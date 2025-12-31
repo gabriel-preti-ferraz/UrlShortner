@@ -4,6 +4,7 @@ import cors from "cors"
 import dotenv from "dotenv"
 dotenv.config({ path: "./.env" })
 import client from "./db.js"
+import {nanoid} from "nanoid"
 
 app.use(express.json())
 app.use(cors())
@@ -16,7 +17,7 @@ app.post("/short", async (req, res) => {
             return res.status(400).json({ error: "Missing URL"})
         }
 
-        const shortId = Math.random().toString(36).substring(2, 8)
+        const shortId = nanoid(6)
         const result = await client.query(
             "INSERT INTO urls (original_url, short_url) VALUES($1, $2) RETURNING short_url", [originalUrl, shortId]
         )
