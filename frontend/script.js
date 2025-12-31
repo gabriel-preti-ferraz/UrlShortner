@@ -2,6 +2,7 @@ const apiUrl = "http://localhost:8080"
 
 const input = document.getElementById('url')
 const form = document.querySelector("form")
+const result = document.getElementById("result")
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault()
@@ -20,7 +21,8 @@ form.addEventListener("submit", async (e) => {
         })
         
         const data = await response.json()
-        alert(`Shortened URL: ${data.shortUrl}`)
+        result.innerHTML = `Shortened URL: <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a>`
+        input.value = ""
     } catch (err) {
         console.log(err)
         alert("An error ocurred")
