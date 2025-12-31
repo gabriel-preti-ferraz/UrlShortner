@@ -22,7 +22,7 @@ app.post("/short", async (req, res) => {
             "INSERT INTO urls (original_url, short_url) VALUES($1, $2) RETURNING short_url", 
             [originalUrl, shortId]
         )
-        res.status(201).json({shortUrl: `${process.env.SITE_URL}/${result.rows[0].short_url}`})
+        res.status(201).json({shortUrl: `${process.env.API_URL}:${process.env.API_PORT}/redirect/${result.rows[0].short_url}`})
     } catch (err) {
         console.log(err.message)
         res.status(500).send("Server error")
@@ -33,16 +33,27 @@ app.get("/redirect/:shortId", async (req, res) => {
     try {
         const {shortId} = req.params
         const result = await client.query(
-            "SELECT original_url FROM urls WHERE short_url ILIKE $1",
+            "SELECT original_url, expires_at FROM urls WHERE short_url ILIKE $1",
             [shortId]
         )
 
-        if (!result.rows) {
+        if (result.rows.length === 0) {
             return res.status(404).json({error: "Link does not exist"})
+        } 
+
+        const { original_url, expires_at } = result.rows[0]
+        const now = new Date()
+
+        if (expires_at && now > expires_at) {
+            return res.status(410).json({error: "Link has expired"})
         }
 
-        const originalUrl = result.rows[0].original_url
-        res.redirect(originalUrl)
+        await client.query(
+            "UPDATE urls SET clicks = clicks + 1 WHERE short_url ILIKE $1",
+            [shortId]
+        )
+
+        res.redirect(original_url)
     } catch (err) {
         console.log(err.message)
         res.status(500).send("Server error")
