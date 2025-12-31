@@ -6,5 +6,5 @@ CREATE TABLE urls (
 	short_id VARCHAR(255),
 	created_at TIMESTAMP DEFAULT NOW(),
 	expires_at TIMESTAMP DEFAULT (NOW() + INTERVAL '1 hour'),
-	clicks INT
+	clicks INT DEFAULT 0
 )
