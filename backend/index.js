@@ -19,10 +19,10 @@ app.post("/short", async (req, res) => {
 
         const shortId = nanoid(6)
         const result = await client.query(
-            "INSERT INTO urls (original_url, short_url) VALUES($1, $2) RETURNING short_url", 
+            "INSERT INTO urls (original_url, short_id) VALUES($1, $2) RETURNING short_id", 
             [originalUrl, shortId]
         )
-        res.status(201).json({shortUrl: `${process.env.API_URL}:${process.env.API_PORT}/redirect/${result.rows[0].short_url}`})
+        res.status(201).json({shortUrl: `${process.env.API_URL}:${process.env.API_PORT}/redirect/${result.rows[0].short_id}`})
     } catch (err) {
         console.log(err.message)
         res.status(500).send("Server error")
@@ -33,7 +33,7 @@ app.get("/redirect/:shortId", async (req, res) => {
     try {
         const {shortId} = req.params
         const result = await client.query(
-            "SELECT original_url, expires_at FROM urls WHERE short_url ILIKE $1",
+            "SELECT original_url, expires_at FROM urls WHERE short_id ILIKE $1",
             [shortId]
         )
 
@@ -49,7 +49,7 @@ app.get("/redirect/:shortId", async (req, res) => {
         }
 
         await client.query(
-            "UPDATE urls SET clicks = clicks + 1 WHERE short_url ILIKE $1",
+            "UPDATE urls SET clicks = clicks + 1 WHERE short_id ILIKE $1",
             [shortId]
         )
 
