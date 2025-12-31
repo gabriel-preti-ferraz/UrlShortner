@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS urls;
+
+CREATE TABLE urls (
+	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	original_url VARCHAR(255) NOT NULL,
+	short_id VARCHAR(255),
+	created_at TIMESTAMP DEFAULT NOW(),
+	expires_at TIMESTAMP DEFAULT (NOW() + INTERVAL '1 hour'),
+	clicks INT
+)
